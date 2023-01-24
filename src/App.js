@@ -14,6 +14,7 @@ import Header from "./components/Header";
 function App() {
   const guessWordRef = useRef("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [word, setWord] = useState([]);
   const [numberOfLetters, setNumberOfLetters] = useState({});
   const [guessedWords, setGuessedWords] = useState([]);
@@ -22,6 +23,7 @@ function App() {
 
   const handlePopulateWord = () => {
     const index = Math.floor(Math.random() * words.length);
+    console.log(words[index]);
     let singleWord = [];
     for (let i = 0; i < words[index].length; i++) {
       singleWord.push(words[index][i].toUpperCase());
@@ -51,7 +53,13 @@ function App() {
       (letter) => letter.isCorrectPlace !== true
     );
     if (check.length > 0) return;
-    setPoints(() => points++);
+    setPoints(() => {
+      localStorage.setItem("points", points + 1);
+      return points + 1;
+    });
+    setSuccess(
+      `Brawo! Udało Ci się. Naciśnij "Od nowa", by zacząć kolejną rundę`
+    );
     setGuessWordOk(true);
   };
 
@@ -60,6 +68,8 @@ function App() {
     setNumberOfLetters({});
     setGuessedWords([]);
     setGuessWordOk(false);
+    setError("");
+    setSuccess("");
     guessWordRef.current.value = "";
     handlePopulateWord();
   };
@@ -103,6 +113,8 @@ function App() {
 
   useEffect(() => {
     handlePopulateWord();
+    const numPoints = localStorage.getItem("points");
+    if (numPoints) setPoints(parseInt(numPoints));
   }, []);
 
   return (
@@ -123,6 +135,20 @@ function App() {
             </Button>
           </Flex>
         </FormControl>
+        {success && (
+          <Box
+            border="2px"
+            borderColor="green.700"
+            p="1rem"
+            mb="1rem"
+            mt="1rem"
+            borderRadius="1rem"
+            bg="green.300"
+            color="grenn.900"
+          >
+            {success}
+          </Box>
+        )}
         {error && (
           <Box
             border="2px"
