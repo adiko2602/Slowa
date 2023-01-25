@@ -116,8 +116,8 @@ function App() {
       };
 
       localStorage.setItem("save", JSON.stringify(save));
-      setInitState(false);
     }
+    setInitState(false);
   };
 
   const showError = async (err) => {
@@ -181,6 +181,7 @@ function App() {
 
   useEffect(() => {
     handleSaveToLocal();
+    console.log("handleSave");
     // eslint-disable-next-line
   });
   return (
