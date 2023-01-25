@@ -15,6 +15,7 @@ import Header from "./components/Header";
 
 function App() {
   const guessWordRef = useRef("");
+  const [initState, setInitState] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [word, setWord] = useState([]);
@@ -22,17 +23,22 @@ function App() {
   const [guessedWords, setGuessedWords] = useState([]);
   const [guessWordOk, setGuessWordOk] = useState(false);
   const [points, setPoints] = useState(0);
-  const [guessWordFade, setGuessWordFade] = useState(false);
+  const [hint, setHint] = useState([]);
+  const [hintButton, setHintButton] = useState(false);
 
   const handlePopulateWord = () => {
     const index = Math.floor(Math.random() * words.length);
     console.log(words[index]);
     let singleWord = [];
+    let hintArr = [];
     for (let i = 0; i < words[index].length; i++) {
       singleWord.push(words[index][i].toUpperCase());
+      hintArr.push("*");
     }
+
     checkNumbersOfLetters(singleWord);
     setWord(singleWord);
+    setHint(hintArr);
   };
 
   const checkNumbersOfLetters = (singleWord) => {
@@ -66,6 +72,10 @@ function App() {
     setGuessWordOk(true);
   };
 
+  const checkIfString = (string) => {
+    return /^[A-Ża-ż]*$/.test(string);
+  };
+
   const resetGame = () => {
     setWord([]);
     setNumberOfLetters({});
@@ -73,8 +83,41 @@ function App() {
     setGuessWordOk(false);
     setError("");
     setSuccess("");
+    setHintButton(false);
     guessWordRef.current.value = "";
     handlePopulateWord();
+  };
+
+  const handleHint = () => {
+    let indexArr = [];
+    let hintArr = [...hint];
+    for (let i = 0; i < hint.length; i++) {
+      if (hint[i] === "*") indexArr.push(i);
+    }
+
+    if (indexArr.length > 2) {
+      const index = Math.floor(Math.random() * indexArr.length);
+      hintArr[indexArr[index]] = word[indexArr[index]];
+      setHint(hintArr);
+      if (indexArr.length === 3) setHintButton(true);
+    }
+  };
+
+  const handleSaveToLocal = () => {
+    if (!initState) {
+      const save = {
+        word,
+        numberOfLetters,
+        guessedWords,
+        guessWordOk,
+        points,
+        hint,
+        hintButton,
+      };
+
+      localStorage.setItem("save", JSON.stringify(save));
+      setInitState(false);
+    }
   };
 
   const showError = async (err) => {
@@ -86,12 +129,17 @@ function App() {
   const delay = (waitTime) => {
     return new Promise((resolve) => setTimeout(resolve, waitTime));
   };
+
   const handleGuessWord = (e) => {
     e.preventDefault();
     setError("");
     const guessWord = guessWordRef.current.value;
+    if (!checkIfString(guessWord)) {
+      showError("Wpisane słowo zawiera niedozwolone znaki.");
+      return;
+    }
     if (guessWord.length !== word.length) {
-      showError(`Wpisane słowo nie zawiera ${word.length} liter`);
+      showError(`Wpisane słowo nie zawiera ${word.length} liter.`);
       return;
     }
     if (!words.includes(guessWord.toUpperCase())) {
@@ -112,20 +160,48 @@ function App() {
     setGuessedWords([...guessedWords, guessWordArray]);
     checkIsCorrect(guessWordArray);
     guessWordRef.current.value = "";
+    handleSaveToLocal();
   };
 
   useEffect(() => {
     handlePopulateWord();
     const numPoints = localStorage.getItem("points");
+    const save = JSON.parse(localStorage.getItem("save"));
     if (numPoints) setPoints(parseInt(numPoints));
+    if (save) {
+      setWord(save.word);
+      setNumberOfLetters(save.numberOfLetters);
+      setGuessedWords(save.guessedWords);
+      setGuessWordOk(save.guessWordOk);
+      setHint(save.hint);
+      setHintButton(save.hintButton);
+    }
+    // eslint-disable-next-line
   }, []);
 
+  useEffect(() => {
+    handleSaveToLocal();
+    // eslint-disable-next-line
+  });
   return (
     <div className="App">
       <Header points={points} />
       <Flex gap={2} flexDir="column" align="center" pl="1rem" pr="1rem">
         <FormControl as="form" onSubmit={handleGuessWord}>
           <Flex gap={2}>
+            {/* <HStack>
+              <PinInput
+                defaultValue="ła"
+                type="alphanumeric"
+                onChange={(pin) => (guessWordRef = pin)}
+              >
+                <PinInputField />
+                <PinInputField />
+                <PinInputField />
+                <PinInputField />
+                <PinInputField />
+              </PinInput>
+            </HStack> */}
             <Input
               placeholder={`Wpisz słowo ${word.length} literowe`}
               ref={guessWordRef}
@@ -175,11 +251,40 @@ function App() {
           </ScaleFade>
         </Collapse>
 
+        <Collapse in={true} animateOpacity>
+          <ScaleFade unmountOnExit initialScale={0.9} in={true}>
+            <HStack p={3}>
+              {hint.map((letter, j) => {
+                return (
+                  <Box
+                    key={j}
+                    borderColor="red.400"
+                    borderWidth="0.2rem"
+                    borderRadius="1rem"
+                  >
+                    <Square w="3rem" h="3rem" fontSize="xx-large">
+                      {letter}
+                    </Square>
+                  </Box>
+                );
+              })}
+
+              <Button
+                isDisabled={hintButton}
+                onClick={handleHint}
+                colorScheme="blue"
+              >
+                Podpowiedź
+              </Button>
+            </HStack>
+          </ScaleFade>
+        </Collapse>
+
         {guessedWords
           .map((wordArray, i) => {
             return (
-              <Collapse in={true} animateOpacity>
-                <ScaleFade key={i} unmountOnExit initialScale={0.9} in={true}>
+              <Collapse key={i} in={true} animateOpacity>
+                <ScaleFade unmountOnExit initialScale={0.9} in={true}>
                   <HStack p={3}>
                     {wordArray.map((letter, j) => {
                       return (
