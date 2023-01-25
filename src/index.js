@@ -5,6 +5,17 @@ import App from "./App";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 
 const theme = extendTheme({
+  styles: {
+    global: {
+      body: {
+        transitionProperty: "all",
+        transitionDuration: "slow",
+      },
+    },
+  },
+  config: {
+    disableTransitionOnChange: false,
+  },
   fonts: {
     heading: `'Ubuntu Mono', monospace`,
     body: `'Ubuntu Mono', monospace`,

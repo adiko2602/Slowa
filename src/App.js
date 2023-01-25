@@ -7,6 +7,8 @@ import {
   Square,
   Flex,
   FormControl,
+  ScaleFade,
+  Collapse,
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import Header from "./components/Header";
@@ -20,6 +22,7 @@ function App() {
   const [guessedWords, setGuessedWords] = useState([]);
   const [guessWordOk, setGuessWordOk] = useState(false);
   const [points, setPoints] = useState(0);
+  const [guessWordFade, setGuessWordFade] = useState(false);
 
   const handlePopulateWord = () => {
     const index = Math.floor(Math.random() * words.length);
@@ -135,64 +138,77 @@ function App() {
             </Button>
           </Flex>
         </FormControl>
-        {success && (
-          <Box
-            border="2px"
-            borderColor="green.700"
-            p="1rem"
-            mb="1rem"
-            mt="1rem"
-            borderRadius="1rem"
-            bg="green.300"
-            color="grenn.900"
+
+        <Collapse in={error || success ? true : false} animateOpacity>
+          <ScaleFade
+            unmountOnExit
+            initialScale={0.9}
+            in={success ? true : false}
           >
-            {success}
-          </Box>
-        )}
-        {error && (
-          <Box
-            border="2px"
-            borderColor="red.700"
-            p="1rem"
-            mb="1rem"
-            mt="1rem"
-            borderRadius="1rem"
-            bg="red.300"
-            color="red.900"
-          >
-            {error}
-          </Box>
-        )}
+            <Box
+              border="2px"
+              borderColor="green.700"
+              p="1rem"
+              mb="1rem"
+              mt="1rem"
+              borderRadius="1rem"
+              bg="green.300"
+              color="grenn.900"
+            >
+              {success}
+            </Box>
+          </ScaleFade>
+
+          <ScaleFade unmountOnExit initialScale={0.9} in={error ? true : false}>
+            <Box
+              border="2px"
+              borderColor="red.700"
+              p="1rem"
+              mb="1rem"
+              mt="1rem"
+              borderRadius="1rem"
+              bg="red.300"
+              color="red.900"
+            >
+              {error}
+            </Box>
+          </ScaleFade>
+        </Collapse>
+
         {guessedWords
           .map((wordArray, i) => {
             return (
-              <HStack key={i} p={3}>
-                {wordArray.map((letter, j) => {
-                  return (
-                    <Box
-                      key={j}
-                      borderColor={
-                        letter.isCorrectPlace
-                          ? "green.600"
-                          : letter.isInWord
-                          ? "yellow.500"
-                          : "gray.700"
-                      }
-                      borderWidth="0.2rem"
-                      borderRadius="1rem"
-                    >
-                      <Square w="3rem" h="3rem" fontSize="xx-large">
-                        {letter.letter}
-                        <Box fontSize="sm">
-                          {letter.numOfOccurance
-                            ? `x${letter.numOfOccurance}`
-                            : ""}
+              <Collapse in={true} animateOpacity>
+                <ScaleFade key={i} unmountOnExit initialScale={0.9} in={true}>
+                  <HStack p={3}>
+                    {wordArray.map((letter, j) => {
+                      return (
+                        <Box
+                          key={j}
+                          borderColor={
+                            letter.isCorrectPlace
+                              ? "green.600"
+                              : letter.isInWord
+                              ? "yellow.500"
+                              : "gray.700"
+                          }
+                          borderWidth="0.2rem"
+                          borderRadius="1rem"
+                        >
+                          <Square w="3rem" h="3rem" fontSize="xx-large">
+                            {letter.letter}
+                            <Box fontSize="sm">
+                              {letter.numOfOccurance
+                                ? `x${letter.numOfOccurance}`
+                                : ""}
+                            </Box>
+                          </Square>
                         </Box>
-                      </Square>
-                    </Box>
-                  );
-                })}
-              </HStack>
+                      );
+                    })}
+                  </HStack>
+                </ScaleFade>
+              </Collapse>
             );
           })
           .reverse()}
