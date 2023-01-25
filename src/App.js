@@ -9,6 +9,7 @@ import {
   FormControl,
   ScaleFade,
   Collapse,
+  Center,
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import Header from "./components/Header";
@@ -254,30 +255,44 @@ function App() {
 
         <Collapse in={true} animateOpacity>
           <ScaleFade unmountOnExit initialScale={0.9} in={true}>
-            <HStack p={3}>
-              {hint.map((letter, j) => {
-                return (
-                  <Box
-                    key={j}
-                    borderColor="red.400"
-                    borderWidth="0.2rem"
-                    borderRadius="1rem"
-                  >
-                    <Square w="3rem" h="3rem" fontSize="xx-large">
-                      {letter}
-                    </Square>
-                  </Box>
-                );
-              })}
+            <Flex direction="column">
+              <HStack p={3}>
+                {hint.map((letter, j) => {
+                  return (
+                    <Box
+                      key={j}
+                      borderColor="red.400"
+                      borderWidth="0.2rem"
+                      borderRadius="1rem"
+                    >
+                      <Square
+                        w={{ base: "2.5rem", sm: "2.5rem", lg: "3rem" }}
+                        h={{ base: "2.5rem", sm: "2.5rem", lg: "3rem" }}
+                        fontSize={{
+                          base: "x-large",
+                          sm: "x-large",
+                          lg: "xx-large",
+                        }}
+                      >
+                        {letter}
+                      </Square>
+                    </Box>
+                  );
+                })}
+              </HStack>
 
-              <Button
-                isDisabled={hintButton}
-                onClick={handleHint}
-                colorScheme="blue"
-              >
-                Podpowiedź
-              </Button>
-            </HStack>
+              <div>
+                <Center>
+                  <Button
+                    isDisabled={hintButton}
+                    onClick={handleHint}
+                    colorScheme="blue"
+                  >
+                    Podpowiedź
+                  </Button>
+                </Center>
+              </div>
+            </Flex>
           </ScaleFade>
         </Collapse>
 
@@ -301,7 +316,15 @@ function App() {
                           borderWidth="0.2rem"
                           borderRadius="1rem"
                         >
-                          <Square w="3rem" h="3rem" fontSize="xx-large">
+                          <Square
+                            w={{ base: "2.5rem", sm: "2.5rem", lg: "3rem" }}
+                            h={{ base: "2.5rem", sm: "2.5rem", lg: "3rem" }}
+                            fontSize={{
+                              base: "x-large",
+                              sm: "x-large",
+                              lg: "xx-large",
+                            }}
+                          >
                             {letter.letter}
                             <Box fontSize="sm">
                               {letter.numOfOccurance
