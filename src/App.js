@@ -17,7 +17,7 @@ import {
   FormLabel,
   Text,
 } from "@chakra-ui/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Header from "./components/Header";
 import useLocalStorage from "./hooks/useLocalStorage";
 import useGameState from "./hooks/useGameState";
@@ -26,6 +26,7 @@ let arrOfWords = [...polish, ...polishSixLetters];
 
 function App() {
   const [gameState, updateGameState] = useGameState();
+  const [modeState, setModeState] = useState(gameState.mode);
   const guessWordRef = useRef("");
 
   // HANDLE //
@@ -120,8 +121,9 @@ function App() {
   };
 
   // handleSetMode
-  const handleSetMode = async (value) => {
+  const handleSetMode = (value) => {
     updateGameState({ type: "SET_MODE", payload: value });
+    setModeState(value);
   };
 
   //////////////////////////////////////////////////////////////////////////////////////
@@ -212,7 +214,7 @@ function App() {
   useEffect(() => {
     resetGame();
     // eslint-disable-next-line
-  }, [gameState.mode]);
+  }, [modeState]);
   useLocalStorage(gameState, updateGameState, resetGame);
 
   return (
