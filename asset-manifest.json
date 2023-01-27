@@ -1,12 +1,12 @@
 {
   "files": {
     "main.css": "/slowa/static/css/main.91354336.css",
-    "main.js": "/slowa/static/js/main.23f551e9.js",
+    "main.js": "/slowa/static/js/main.66f93958.js",
     "index.html": "/slowa/index.html",
-    "main.23f551e9.js.map": "/slowa/static/js/main.23f551e9.js.map"
+    "main.66f93958.js.map": "/slowa/static/js/main.66f93958.js.map"
   },
   "entrypoints": [
     "static/css/main.91354336.css",
-    "static/js/main.23f551e9.js"
+    "static/js/main.66f93958.js"
   ]
 }
