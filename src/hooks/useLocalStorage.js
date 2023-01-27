@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-export default function useLocalStorage(gameState, updateGameState) {
+export default function useLocalStorage(gameState, updateGameState, resetGame) {
   const setSave = () => {
     if (gameState) localStorage.setItem("save", JSON.stringify(gameState));
   };
@@ -8,6 +8,7 @@ export default function useLocalStorage(gameState, updateGameState) {
   const getSave = async () => {
     const saveData = await JSON.parse(localStorage.getItem("save"));
     if (saveData) updateGameState({ type: "SET_SAVE", payload: saveData });
+    else resetGame();
     updateGameState({ type: "INIT_STATE", payload: false });
   };
 

@@ -1,4 +1,4 @@
-import { words } from "./words";
+import { polish as words } from "./resources/polish";
 import {
   Input,
   Button,
@@ -18,13 +18,15 @@ import useGameState from "./hooks/useGameState";
 
 function App() {
   const [gameState, updateGameState] = useGameState();
-  useLocalStorage(gameState, updateGameState);
   const guessWordRef = useRef("");
 
   // HANDLE //
   // handlePopulateWord
   const handlePopulateWord = () => {
-    const index = Math.floor(Math.random() * words.length);
+    let index = findIndex(words);
+    while (words[index].length < 4 || words[index].length > 8) {
+      index = findIndex(words);
+    }
     let singleWord = [];
     let hintArr = [];
 
@@ -73,7 +75,10 @@ function App() {
       showError(`Wpisane słowo nie zawiera ${gameState.word.length} liter.`);
       return;
     }
-    if (!words.includes(guessWord.toUpperCase())) {
+    const w = words.filter(
+      (element) => element.toUpperCase() === guessWord.toUpperCase()
+    );
+    if (w.length < 1) {
       showError("Słownik nie zawiera wpisanego słowa.");
       return;
     }
@@ -178,6 +183,13 @@ function App() {
   const delay = (waitTime) => {
     return new Promise((resolve) => setTimeout(resolve, waitTime));
   };
+
+  // findIndex
+  const findIndex = (arr) => {
+    return Math.floor(Math.random() * arr.length);
+  };
+
+  useLocalStorage(gameState, updateGameState, resetGame);
 
   return (
     <div className="App">
