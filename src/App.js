@@ -1,4 +1,5 @@
-import { polish as words } from "./resources/polish";
+import { polish } from "./resources/polish";
+import { polishSixLetters } from "./resources/polishSixLetters";
 import {
   Input,
   Button,
@@ -16,6 +17,8 @@ import Header from "./components/Header";
 import useLocalStorage from "./hooks/useLocalStorage";
 import useGameState from "./hooks/useGameState";
 
+let arrOfWords = [...polish, ...polishSixLetters];
+
 function App() {
   const [gameState, updateGameState] = useGameState();
   const guessWordRef = useRef("");
@@ -23,14 +26,14 @@ function App() {
   // HANDLE //
   // handlePopulateWord
   const handlePopulateWord = () => {
-    let index = findIndex(words);
-    while (words[index].length < 4 || words[index].length > 8) {
-      index = findIndex(words);
+    let index = findIndex(arrOfWords);
+    while (arrOfWords[index].length < 4 || arrOfWords[index].length > 8) {
+      index = findIndex(arrOfWords);
     }
     let singleWord = [];
     let hintArr = [];
 
-    [...words[index]].forEach((char) => {
+    [...arrOfWords[index]].forEach((char) => {
       singleWord.push(char.toUpperCase());
       hintArr.push({ letter: "*", correct: false });
     });
@@ -40,7 +43,7 @@ function App() {
     updateGameState({ type: "SET_HINT", payload: hintArr });
 
     // ESTEREGG IN CONSOLE
-    console.log(words[index]);
+    console.log(arrOfWords[index]);
   };
 
   // handleHint
@@ -75,7 +78,7 @@ function App() {
       showError(`Wpisane słowo nie zawiera ${gameState.word.length} liter.`);
       return;
     }
-    const w = words.filter(
+    const w = arrOfWords.filter(
       (element) => element.toUpperCase() === guessWord.toUpperCase()
     );
     if (w.length < 1) {
