@@ -270,8 +270,8 @@ function App() {
                       borderRadius="1rem"
                     >
                       <Square
-                        w={{ base: "2.5rem", sm: "2.5rem", lg: "3rem" }}
-                        h={{ base: "2.5rem", sm: "2.5rem", lg: "3rem" }}
+                        w={{ base: "2rem", sm: "2rem", lg: "3rem" }}
+                        h={{ base: "2rem", sm: "2rem", lg: "3rem" }}
                         fontSize={{
                           base: "x-large",
                           sm: "x-large",
@@ -339,11 +339,11 @@ function App() {
                           borderRadius="1rem"
                         >
                           <Square
-                            w={{ base: "2.5rem", sm: "2.5rem", lg: "3rem" }}
-                            h={{ base: "2.5rem", sm: "2.5rem", lg: "3rem" }}
+                            w={{ base: "2rem", sm: "2rem", lg: "3rem" }}
+                            h={{ base: "2rem", sm: "2rem", lg: "3rem" }}
                             fontSize={{
-                              base: "x-large",
-                              sm: "x-large",
+                              base: "large",
+                              sm: "large",
                               lg: "xx-large",
                             }}
                           >
