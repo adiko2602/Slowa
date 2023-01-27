@@ -26,6 +26,7 @@ function App() {
   const [points, setPoints] = useState(0);
   const [hint, setHint] = useState([]);
   const [hintButton, setHintButton] = useState(false);
+  const [showOccurance, setShowOccurance] = useState(false);
 
   const handlePopulateWord = () => {
     const index = Math.floor(Math.random() * words.length);
@@ -114,6 +115,7 @@ function App() {
         points,
         hint,
         hintButton,
+        showOccurance,
       };
 
       localStorage.setItem("save", JSON.stringify(save));
@@ -188,6 +190,7 @@ function App() {
       setGuessWordOk(save.guessWordOk);
       setHint(save.hint);
       setHintButton(save.hintButton);
+      setShowOccurance(save.showOccurance);
     }
     // eslint-disable-next-line
   }, []);
@@ -254,7 +257,7 @@ function App() {
 
         <Collapse in={true} animateOpacity>
           <ScaleFade unmountOnExit initialScale={0.9} in={true}>
-            <Flex direction="column">
+            <Flex direction="column" gap={2}>
               <HStack p={3}>
                 {hint.map((letter, j) => {
                   return (
@@ -291,6 +294,19 @@ function App() {
                   </Button>
                 </Center>
               </div>
+              <div>
+                <Center>
+                  <Button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setShowOccurance(!showOccurance);
+                    }}
+                    colorScheme="blue"
+                  >
+                    {showOccurance ? "Showaj wystąpienia" : "Pokaż wystąpienia"}
+                  </Button>
+                </Center>
+              </div>
             </Flex>
           </ScaleFade>
         </Collapse>
@@ -310,7 +326,7 @@ function App() {
                               ? "green.600"
                               : letter.isInWord
                               ? "yellow.500"
-                              : "gray.700"
+                              : "gray.900"
                           }
                           borderWidth="0.2rem"
                           borderRadius="1rem"
@@ -325,11 +341,13 @@ function App() {
                             }}
                           >
                             {letter.letter}
-                            <Box fontSize="sm">
-                              {letter.numOfOccurance
-                                ? `x${letter.numOfOccurance}`
-                                : ""}
-                            </Box>
+                            {showOccurance && (
+                              <Box fontSize="sm">
+                                {letter.numOfOccurance
+                                  ? `x${letter.numOfOccurance}`
+                                  : ""}
+                              </Box>
+                            )}
                           </Square>
                         </Box>
                       );
