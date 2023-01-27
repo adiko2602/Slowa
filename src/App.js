@@ -11,138 +11,66 @@ import {
   Collapse,
   Center,
 } from "@chakra-ui/react";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import Header from "./components/Header";
+import useLocalStorage from "./hooks/useLocalStorage";
+import useGameState from "./hooks/useGameState";
 
 function App() {
+  const [gameState, updateGameState] = useGameState();
+  useLocalStorage(gameState, updateGameState);
   const guessWordRef = useRef("");
-  const [initState, setInitState] = useState(true);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [word, setWord] = useState([]);
-  const [numberOfLetters, setNumberOfLetters] = useState({});
-  const [guessedWords, setGuessedWords] = useState([]);
-  const [guessWordOk, setGuessWordOk] = useState(false);
-  const [points, setPoints] = useState(0);
-  const [hint, setHint] = useState([]);
-  const [hintButton, setHintButton] = useState(false);
-  const [showOccurance, setShowOccurance] = useState(false);
 
+  // HANDLE //
+  // handlePopulateWord
   const handlePopulateWord = () => {
     const index = Math.floor(Math.random() * words.length);
-    console.log(words[index]);
     let singleWord = [];
     let hintArr = [];
-    for (let i = 0; i < words[index].length; i++) {
-      singleWord.push(words[index][i].toUpperCase());
+
+    [...words[index]].forEach((char) => {
+      singleWord.push(char.toUpperCase());
       hintArr.push({ letter: "*", correct: false });
-    }
+    });
 
     checkNumbersOfLetters(singleWord);
-    setWord(singleWord);
-    setHint(hintArr);
+    updateGameState({ type: "SET_WORD", payload: singleWord });
+    updateGameState({ type: "SET_HINT", payload: hintArr });
+
+    // ESTEREGG IN CONSOLE
+    console.log(words[index]);
   };
 
-  const checkNumbersOfLetters = (singleWord) => {
-    const count = {};
-    singleWord.forEach((char) => {
-      count[char] = count[char] ? count[char] + 1 : 1;
-    });
-    setNumberOfLetters(count);
-  };
-
-  const checkIsInWord = (letter) => {
-    return word.includes(letter.toUpperCase());
-  };
-
-  const checkIsCorrectPlace = (letter, index) => {
-    return word[index] === letter.toUpperCase();
-  };
-
-  const checkIsCorrect = (guessWordArray) => {
-    const check = guessWordArray.filter(
-      (letter) => letter.isCorrectPlace !== true
-    );
-    if (check.length > 0) return;
-    setPoints(() => {
-      localStorage.setItem("points", points + 1);
-      return points + 1;
-    });
-    setSuccess(
-      `Brawo! Udało Ci się. Naciśnij "Od nowa", by zacząć kolejną rundę`
-    );
-    setGuessWordOk(true);
-  };
-
-  const checkIfString = (string) => {
-    return /^[A-Ża-ż]*$/.test(string);
-  };
-
-  const resetGame = () => {
-    setWord([]);
-    setNumberOfLetters({});
-    setGuessedWords([]);
-    setGuessWordOk(false);
-    setError("");
-    setSuccess("");
-    setHintButton(false);
-    guessWordRef.current.value = "";
-    handlePopulateWord();
-  };
-
+  // handleHint
   const handleHint = () => {
     let indexArr = [];
-    let hintArr = [...hint];
-    for (let i = 0; i < hint.length; i++) {
-      if (hint[i].letter === "*") indexArr.push(i);
-    }
+    let hintArr = [...gameState.hint];
+
+    hintArr.forEach((element, i) => {
+      if (element.letter === "*") indexArr.push(i);
+    });
 
     if (indexArr.length > 2) {
       const index = Math.floor(Math.random() * indexArr.length);
-      hintArr[indexArr[index]].letter = word[indexArr[index]];
-      setHint(hintArr);
-      if (indexArr.length === 3) setHintButton(true);
+      hintArr[indexArr[index]].letter = gameState.word[indexArr[index]];
+      updateGameState({ type: "SET_HINT", payload: hintArr });
+      if (indexArr.length === 3)
+        updateGameState({ type: "HINT_BUTTON", payload: true });
     }
   };
 
-  const handleSaveToLocal = () => {
-    if (!initState) {
-      const save = {
-        word,
-        numberOfLetters,
-        guessedWords,
-        guessWordOk,
-        points,
-        hint,
-        hintButton,
-        showOccurance,
-      };
-
-      localStorage.setItem("save", JSON.stringify(save));
-    }
-    setInitState(false);
-  };
-
-  const showError = async (err) => {
-    setError(err);
-    await delay(5000);
-    setError("");
-  };
-
-  const delay = (waitTime) => {
-    return new Promise((resolve) => setTimeout(resolve, waitTime));
-  };
-
+  // handleGuessWord
   const handleGuessWord = (e) => {
     e.preventDefault();
-    setError("");
+    updateGameState({ type: "DELETE_ERROR" });
+
     const guessWord = guessWordRef.current.value;
     if (!checkIfString(guessWord)) {
       showError("Wpisane słowo zawiera niedozwolone znaki.");
       return;
     }
-    if (guessWord.length !== word.length) {
-      showError(`Wpisane słowo nie zawiera ${word.length} liter.`);
+    if (guessWord.length !== gameState.word.length) {
+      showError(`Wpisane słowo nie zawiera ${gameState.word.length} liter.`);
       return;
     }
     if (!words.includes(guessWord.toUpperCase())) {
@@ -150,67 +78,122 @@ function App() {
       return;
     }
     let guessWordArray = [];
-    for (let i = 0; i < guessWord.length; i++) {
+
+    [...guessWord].forEach((char, i) => {
       guessWordArray.push({
-        letter: guessWord[i].toUpperCase(),
-        isInWord: checkIsInWord(guessWord[i]),
-        isCorrectPlace: checkIsCorrectPlace(guessWord[i], i),
-        numOfOccurance: checkIsInWord(guessWord[i])
-          ? numberOfLetters[guessWord[i].toUpperCase()]
+        letter: char.toUpperCase(),
+        isInWord: checkIsInWord(char),
+        isCorrectPlace: checkIsCorrectPlace(char, i),
+        numOfOccurance: checkIsInWord(char)
+          ? gameState.numberOfLetters[char.toUpperCase()]
           : null,
       });
-    }
+    });
+
+    updateGameState({
+      type: "SET_GUESSED_WORDS",
+      payload: [...gameState.guessedWords, guessWordArray],
+    });
+
     showCorrectLetters(guessWordArray);
-    setGuessedWords([...guessedWords, guessWordArray]);
     checkIsCorrect(guessWordArray);
     guessWordRef.current.value = "";
-    handleSaveToLocal();
+  };
+  //////////////////////////////////////////////////////////////////////////////////////
+
+  // CHECK //
+  // checkNumbersOfLetters
+  const checkNumbersOfLetters = (singleWord) => {
+    const count = {};
+    singleWord.forEach((char) => {
+      count[char] = count[char] ? count[char] + 1 : 1;
+    });
+    updateGameState({ type: "SET_NUM_LETTERS", payload: count });
   };
 
+  // checkIsInWord
+  const checkIsInWord = (letter) => {
+    return gameState.word.includes(letter.toUpperCase());
+  };
+
+  // checkIsCorrectPlace
+  const checkIsCorrectPlace = (letter, index) => {
+    return gameState.word[index] === letter.toUpperCase();
+  };
+
+  // checkIsCorrect
+  const checkIsCorrect = (guessWordArray) => {
+    const check = guessWordArray.filter(
+      (letter) => letter.isCorrectPlace !== true
+    );
+    if (check.length > 0) return;
+    updateGameState({ type: "ADD_POINT" });
+
+    updateGameState({
+      type: "SET_SUCCESS",
+      payload: `Brawo! Udało Ci się. Naciśnij "Od nowa", by zacząć kolejną rundę`,
+    });
+    updateGameState({
+      type: "GUESS_WORD_OK",
+      payload: true,
+    });
+  };
+
+  // checkIfString
+  const checkIfString = (string) => {
+    return /^[A-Ża-ż]*$/.test(string);
+  };
+  //////////////////////////////////////////////////////////////////////////////////////
+
+  // SHOW //
+  // showError
+  const showError = async (err) => {
+    updateGameState({ type: "SET_ERROR", payload: err });
+    await delay(5000);
+    updateGameState({ type: "DELETE_ERROR" });
+  };
+
+  // showCorrectLetters
   const showCorrectLetters = (guessWordArray) => {
-    let hintArr = [...hint];
-    for (let i = 0; i < guessWordArray.length; i++) {
-      if (guessWordArray[i].isCorrectPlace) {
-        hintArr[i].letter = guessWordArray[i].letter;
+    let hintArr = [...gameState.hint];
+    guessWordArray.forEach((element, i) => {
+      if (element.isCorrectPlace) {
+        hintArr[i].letter = element.letter;
         hintArr[i].correct = true;
       }
-    }
-    setHint(hintArr);
+    });
+    updateGameState({ type: "SET_HINT", payload: hintArr });
+  };
+  //////////////////////////////////////////////////////////////////////////////////////
+
+  // DIFFRENT //
+  // resetGame
+  const resetGame = () => {
+    updateGameState({ type: "RESET_GAME" });
+    guessWordRef.current.value = "";
+    handlePopulateWord();
   };
 
-  useEffect(() => {
-    handlePopulateWord();
-    const numPoints = localStorage.getItem("points");
-    const save = JSON.parse(localStorage.getItem("save"));
-    if (numPoints) setPoints(parseInt(numPoints));
-    if (save) {
-      setWord(save.word);
-      setNumberOfLetters(save.numberOfLetters);
-      setGuessedWords(save.guessedWords);
-      setGuessWordOk(save.guessWordOk);
-      setHint(save.hint);
-      setHintButton(save.hintButton);
-      setShowOccurance(save.showOccurance);
-    }
-    // eslint-disable-next-line
-  }, []);
+  // delay
+  const delay = (waitTime) => {
+    return new Promise((resolve) => setTimeout(resolve, waitTime));
+  };
 
-  useEffect(() => {
-    handleSaveToLocal();
-    console.log("handleSave");
-    // eslint-disable-next-line
-  });
   return (
     <div className="App">
-      <Header points={points} />
+      <Header points={gameState.points} />
       <Flex gap={2} flexDir="column" align="center" pl="1rem" pr="1rem">
         <FormControl as="form" onSubmit={handleGuessWord}>
           <Flex gap={2}>
             <Input
-              placeholder={`Wpisz słowo ${word.length} literowe`}
+              placeholder={`Wpisz słowo ${gameState.word.length} literowe`}
               ref={guessWordRef}
             />
-            <Button isDisabled={guessWordOk} type="submit" colorScheme="blue">
+            <Button
+              isDisabled={gameState.guessWordOk}
+              type="submit"
+              colorScheme="blue"
+            >
               Zgadnij
             </Button>
             <Button onClick={resetGame} colorScheme="blue">
@@ -219,11 +202,14 @@ function App() {
           </Flex>
         </FormControl>
 
-        <Collapse in={error || success ? true : false} animateOpacity>
+        <Collapse
+          in={gameState.error || gameState.success ? true : false}
+          animateOpacity
+        >
           <ScaleFade
             unmountOnExit
             initialScale={0.9}
-            in={success ? true : false}
+            in={gameState.success ? true : false}
           >
             <Box
               border="2px"
@@ -235,11 +221,15 @@ function App() {
               bg="green.300"
               color="grenn.900"
             >
-              {success}
+              {gameState.success}
             </Box>
           </ScaleFade>
 
-          <ScaleFade unmountOnExit initialScale={0.9} in={error ? true : false}>
+          <ScaleFade
+            unmountOnExit
+            initialScale={0.9}
+            in={gameState.error ? true : false}
+          >
             <Box
               border="2px"
               borderColor="red.700"
@@ -250,7 +240,7 @@ function App() {
               bg="red.300"
               color="red.900"
             >
-              {error}
+              {gameState.error}
             </Box>
           </ScaleFade>
         </Collapse>
@@ -259,7 +249,7 @@ function App() {
           <ScaleFade unmountOnExit initialScale={0.9} in={true}>
             <Flex direction="column" gap={2}>
               <HStack p={3}>
-                {hint.map((letter, j) => {
+                {gameState.hint.map((letter, j) => {
                   return (
                     <Box
                       key={j}
@@ -286,7 +276,7 @@ function App() {
               <div>
                 <Center>
                   <Button
-                    isDisabled={hintButton}
+                    isDisabled={gameState.hintButton}
                     onClick={handleHint}
                     colorScheme="blue"
                   >
@@ -299,11 +289,16 @@ function App() {
                   <Button
                     onClick={(e) => {
                       e.preventDefault();
-                      setShowOccurance(!showOccurance);
+                      updateGameState({
+                        type: "SHOW_OCCURANCE",
+                        payload: !gameState.showOccurance,
+                      });
                     }}
                     colorScheme="blue"
                   >
-                    {showOccurance ? "Showaj wystąpienia" : "Pokaż wystąpienia"}
+                    {gameState.showOccurance
+                      ? "Showaj wystąpienia"
+                      : "Pokaż wystąpienia"}
                   </Button>
                 </Center>
               </div>
@@ -311,7 +306,7 @@ function App() {
           </ScaleFade>
         </Collapse>
 
-        {guessedWords
+        {gameState.guessedWords
           .map((wordArray, i) => {
             return (
               <Collapse key={i} in={true} animateOpacity>
@@ -341,7 +336,7 @@ function App() {
                             }}
                           >
                             {letter.letter}
-                            {showOccurance && (
+                            {gameState.showOccurance && (
                               <Box fontSize="sm">
                                 {letter.numOfOccurance
                                   ? `x${letter.numOfOccurance}`
