@@ -34,7 +34,7 @@ function App() {
     let hintArr = [];
     for (let i = 0; i < words[index].length; i++) {
       singleWord.push(words[index][i].toUpperCase());
-      hintArr.push("*");
+      hintArr.push({ letter: "*", correct: false });
     }
 
     checkNumbersOfLetters(singleWord);
@@ -93,12 +93,12 @@ function App() {
     let indexArr = [];
     let hintArr = [...hint];
     for (let i = 0; i < hint.length; i++) {
-      if (hint[i] === "*") indexArr.push(i);
+      if (hint[i].letter === "*") indexArr.push(i);
     }
 
     if (indexArr.length > 2) {
       const index = Math.floor(Math.random() * indexArr.length);
-      hintArr[indexArr[index]] = word[indexArr[index]];
+      hintArr[indexArr[index]].letter = word[indexArr[index]];
       setHint(hintArr);
       if (indexArr.length === 3) setHintButton(true);
     }
@@ -158,10 +158,22 @@ function App() {
           : null,
       });
     }
+    showCorrectLetters(guessWordArray);
     setGuessedWords([...guessedWords, guessWordArray]);
     checkIsCorrect(guessWordArray);
     guessWordRef.current.value = "";
     handleSaveToLocal();
+  };
+
+  const showCorrectLetters = (guessWordArray) => {
+    let hintArr = [...hint];
+    for (let i = 0; i < guessWordArray.length; i++) {
+      if (guessWordArray[i].isCorrectPlace) {
+        hintArr[i].letter = guessWordArray[i].letter;
+        hintArr[i].correct = true;
+      }
+    }
+    setHint(hintArr);
   };
 
   useEffect(() => {
@@ -191,19 +203,6 @@ function App() {
       <Flex gap={2} flexDir="column" align="center" pl="1rem" pr="1rem">
         <FormControl as="form" onSubmit={handleGuessWord}>
           <Flex gap={2}>
-            {/* <HStack>
-              <PinInput
-                defaultValue="ła"
-                type="alphanumeric"
-                onChange={(pin) => (guessWordRef = pin)}
-              >
-                <PinInputField />
-                <PinInputField />
-                <PinInputField />
-                <PinInputField />
-                <PinInputField />
-              </PinInput>
-            </HStack> */}
             <Input
               placeholder={`Wpisz słowo ${word.length} literowe`}
               ref={guessWordRef}
@@ -261,7 +260,7 @@ function App() {
                   return (
                     <Box
                       key={j}
-                      borderColor="red.400"
+                      borderColor={letter.correct ? "green.600" : "red.400"}
                       borderWidth="0.2rem"
                       borderRadius="1rem"
                     >
@@ -274,7 +273,7 @@ function App() {
                           lg: "xx-large",
                         }}
                       >
-                        {letter}
+                        {letter.letter}
                       </Square>
                     </Box>
                   );
