@@ -10,6 +10,7 @@ export const initState = {
   hint: [],
   hintButton: false,
   showOccurance: false,
+  mode: "random",
 };
 
 export function reducer(state, action) {
@@ -94,6 +95,10 @@ export function reducer(state, action) {
 
     case "SET_SAVE":
       return action.payload;
+
+    // SET MODE
+    case "SET_MODE":
+      return { ...state, mode: action.payload };
 
     default:
       return { state };

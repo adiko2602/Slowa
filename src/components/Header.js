@@ -27,11 +27,9 @@ export default function Header({ points }) {
         GRA W SŁOWA
       </Heading>
       <Spacer />
-      <Button
-        leftIcon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
-        onClick={toggleColorMode}
-      >
-        Motyw {colorMode === "light" ? "ciemny" : "jasny"}
+      <Button onClick={toggleColorMode}>
+        {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+        {/* Motyw {colorMode === "light" ? "ciemny" : "jasny"} */}
       </Button>
       <Circle
         size="3.5rem"

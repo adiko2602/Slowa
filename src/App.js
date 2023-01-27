@@ -11,8 +11,13 @@ import {
   ScaleFade,
   Collapse,
   Center,
+  RadioGroup,
+  Stack,
+  Radio,
+  FormLabel,
+  Text,
 } from "@chakra-ui/react";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import Header from "./components/Header";
 import useLocalStorage from "./hooks/useLocalStorage";
 import useGameState from "./hooks/useGameState";
@@ -27,8 +32,14 @@ function App() {
   // handlePopulateWord
   const handlePopulateWord = () => {
     let index = findIndex(arrOfWords);
-    while (arrOfWords[index].length < 4 || arrOfWords[index].length > 8) {
-      index = findIndex(arrOfWords);
+    if (gameState.mode === "random") {
+      while (arrOfWords[index].length < 4 || arrOfWords[index].length > 8) {
+        index = findIndex(arrOfWords);
+      }
+    } else {
+      while (arrOfWords[index].length !== parseInt(gameState.mode)) {
+        index = findIndex(arrOfWords);
+      }
     }
     let singleWord = [];
     let hintArr = [];
@@ -107,6 +118,12 @@ function App() {
     checkIsCorrect(guessWordArray);
     guessWordRef.current.value = "";
   };
+
+  // handleSetMode
+  const handleSetMode = async (value) => {
+    updateGameState({ type: "SET_MODE", payload: value });
+  };
+
   //////////////////////////////////////////////////////////////////////////////////////
 
   // CHECK //
@@ -192,27 +209,67 @@ function App() {
     return Math.floor(Math.random() * arr.length);
   };
 
+  useEffect(() => {
+    resetGame();
+    // eslint-disable-next-line
+  }, [gameState.mode]);
   useLocalStorage(gameState, updateGameState, resetGame);
 
   return (
     <div className="App">
       <Header points={gameState.points} />
+      <Flex flexDir="column" align="center" mb="1rem">
+        <FormLabel as="legend">Ilość liter w słowie: </FormLabel>
+        <RadioGroup onChange={handleSetMode} value={gameState.mode}>
+          <Stack
+            gap={1}
+            mb={"1rem"}
+            // direction={{ base: "column", lg: "row" }}
+            direction="row"
+          >
+            <Radio colorScheme="blue" value="4">
+              4
+            </Radio>
+            <Radio colorScheme="blue" value="5">
+              5
+            </Radio>
+            <Radio colorScheme="blue" value="6">
+              6
+            </Radio>
+            <Radio colorScheme="blue" value="7">
+              7
+            </Radio>
+            <Radio colorScheme="blue" value="8">
+              8
+            </Radio>
+            <Radio colorScheme="blue" value="random">
+              Losowo
+            </Radio>
+          </Stack>
+        </RadioGroup>
+      </Flex>
       <Flex gap={2} flexDir="column" align="center" pl="1rem" pr="1rem">
         <FormControl as="form" onSubmit={handleGuessWord}>
           <Flex gap={2}>
             <Input
+              size={{ base: "sm", lg: "md" }}
               placeholder={`Wpisz słowo ${gameState.word.length} literowe`}
               ref={guessWordRef}
             />
             <Button
+              size={{ base: "sm", lg: "md" }}
               isDisabled={gameState.guessWordOk}
               type="submit"
               colorScheme="blue"
             >
-              Zgadnij
+              <Text fontSize={{ base: "xs", lg: "sm" }}>Zgadnij</Text>
             </Button>
-            <Button onClick={resetGame} colorScheme="blue">
-              Od nowa
+            <Button
+              size={{ base: "sm", lg: "md" }}
+              onClick={resetGame}
+              colorScheme="blue"
+            >
+              <Text fontSize={{ base: "xs", lg: "sm" }}>Od nowa</Text>
             </Button>
           </Flex>
         </FormControl>
@@ -291,17 +348,19 @@ function App() {
               <div>
                 <Center>
                   <Button
+                    size={{ base: "sm", lg: "md" }}
                     isDisabled={gameState.hintButton}
                     onClick={handleHint}
                     colorScheme="blue"
                   >
-                    Podpowiedź
+                    <Text fontSize={{ base: "xs", lg: "sm" }}>Podpowiedź</Text>
                   </Button>
                 </Center>
               </div>
               <div>
                 <Center>
                   <Button
+                    size={{ base: "sm", lg: "md" }}
                     onClick={(e) => {
                       e.preventDefault();
                       updateGameState({
@@ -311,9 +370,11 @@ function App() {
                     }}
                     colorScheme="blue"
                   >
-                    {gameState.showOccurance
-                      ? "Showaj wystąpienia"
-                      : "Pokaż wystąpienia"}
+                    <Text fontSize={{ base: "xs", lg: "sm" }}>
+                      {gameState.showOccurance
+                        ? "Showaj wystąpienia"
+                        : "Pokaż wystąpienia"}
+                    </Text>
                   </Button>
                 </Center>
               </div>
