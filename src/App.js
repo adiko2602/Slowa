@@ -273,8 +273,8 @@ function App() {
                         w={{ base: "2rem", sm: "2rem", lg: "3rem" }}
                         h={{ base: "2rem", sm: "2rem", lg: "3rem" }}
                         fontSize={{
-                          base: "x-large",
-                          sm: "x-large",
+                          base: "large",
+                          sm: "large",
                           lg: "xx-large",
                         }}
                       >
